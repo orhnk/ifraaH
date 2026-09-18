@@ -2,6 +2,7 @@
 
 !templates/
 !themes/
+!themes/**
 
 !.gitignore
 
