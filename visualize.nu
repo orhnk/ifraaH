@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 
 # USAGE:
-# `ls themes/gruv* | each { ./visualize.nu $in.name}`
+# `ls themes/*.yaml | each { ./visualize.nu $in.name}`
 
 # Visualizes a theme in the terminal.
 def main [
@@ -12,12 +12,8 @@ def main [
   }
 
   let theme = open $theme
-  | str replace --all ";" ","
-  | str replace --all "=" ":"
-  | from json
 
-  $theme
-  | reject name author
+  $theme.palette
   | transpose key value
   | each {|it|
     let color_hex = "#" + $it.value
