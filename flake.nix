@@ -11,7 +11,7 @@
     # Convert YAML to JSON at evaluation time using yj, then parse with fromJSON.
     # This is the standard IFD-based workaround since Nix has no built-in YAML parser.
     importYaml = file:
-      builtins.fromJSON (builtins.readFile (pkgs.runCommandNoCC "converted-yaml.json" ''
+      builtins.fromJSON (builtins.readFile (pkgs.runCommand "converted-yaml.json" {} ''
         ${pkgs.yj}/bin/yj < "${file}" > "$out"
       ''));
 
