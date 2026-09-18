@@ -4,15 +4,23 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
   outputs = { self, nixpkgs }: let
-    system = "x86_64-linux"; # or aarch64-linux, etc.
-    lib = nixpkgs.legacyPackages.${system}.lib;
+    system = "x86_64-linux";
+    pkgs   = nixpkgs.legacyPackages.${system};
+    lib    = pkgs.lib;
+
+    # Convert YAML to JSON at evaluation time using yj, then parse with fromJSON.
+    # This is the standard IFD-based workaround since Nix has no built-in YAML parser.
+    importYaml = file:
+      builtins.fromJSON (builtins.readFile (pkgs.runCommandNoCC "converted-yaml.json" ''
+        ${pkgs.yj}/bin/yj < "${file}" > "$out"
+      ''));
 
     themesDir = ./themes;
     entries   = builtins.readDir themesDir;
 
     raw = builtins.listToAttrs (map (name: {
       name  = lib.removeSuffix ".yaml" name;
-      value = lib.importYAML (themesDir + "/${name}");
+      value = importYaml (themesDir + "/${name}");
     }) (builtins.filter
           (n: entries.${n} == "regular" && lib.hasSuffix ".yaml" n)
           (builtins.attrNames entries)));
